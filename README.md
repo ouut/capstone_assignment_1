@@ -1,36 +1,22 @@
 # FashionMNIST CNN Model Server
 
-FastAPI server that serves a PyTorch CNN model for FashionMNIST image classification. Supports model upload, single-image prediction, and batch prediction — all containerised with Docker.
+FastAPI server for FashionMNIST image classification with PyTorch CNN. Accepts JSON pixel data for single and batch prediction.
 
 ## Quick Start
 
-### 1. Build the Docker image
-
 ```bash
-docker build -t fashion-cnn-server .
+# Install dependencies
+pip install fastapi uvicorn[standard] pillow torch torchvision numpy
+
+# Start the server
+uvicorn server:app --host 0.0.0.0 --port 8000
 ```
 
-### 2. Run the container
-
-```bash
-docker run -p 8000:8000 fashion-cnn-server
-```
-
-The server is now live at **http://localhost:8000**.
-
-### 3. Auto-load a model at startup (optional)
-
-If you already have a trained model, mount it and set `MODEL_PATH`:
-
-```bash
-docker run -p 8000:8000 -v $(pwd)/models:/app/models:ro -e MODEL_PATH=/app/models/best_model.pt fashion-cnn-server
-```
+The server is live at **http://localhost:8000**。打开 **http://localhost:8000/docs** 查看 Swagger UI。
 
 ## API Endpoints
 
 ### `GET /health`
-
-Check if the server is running and which device is in use.
 
 ```bash
 curl http://localhost:8000/health
@@ -39,83 +25,36 @@ curl http://localhost:8000/health
 
 ### `GET /classes`
 
-List the 10 FashionMNIST class labels.
-
 ```bash
 curl http://localhost:8000/classes
+# → {"classes":["T-shirt/top","Trouser","Pullover","Dress","Coat","Sandal","Shirt","Sneaker","Bag","Ankle boot"]}
 ```
 
-### `POST /upload-model`
+### `POST /predict-json`
 
-Upload a trained PyTorch model file (`.pt` or `.pth`). Supports both:
-- **Full model**: saved with `torch.save(model, 'model.pt')`
-- **State dict**: saved with `torch.save(model.state_dict(), 'model.pt')`
+传入 JSON 像素数据，支持单张和批量预测。
+
+**单张预测** — 传入 784 个像素值（28x28 拉平）或 28x28 二维数组：
 
 ```bash
-curl -X POST http://localhost:8000/upload-model \
-  -F "file=@cnn_model.pt"
-# → {"message":"Model loaded successfully","device":"cpu"}
+curl -X POST http://localhost:8000/predict-json \
+  -H "Content-Type: application/json" \
+  -d '{"image": [0,0,0, ... 784 values ...]}'
+# → {"predicted_class":"Ankle boot","predicted_index":9,"probabilities":{...}}
 ```
 
-### `POST /predict`
-
-Upload a 28×28 grayscale FashionMNIST image and get a prediction.
+**批量预测** — 传入多个图像：
 
 ```bash
-curl -X POST http://localhost:8000/predict \
-  -F "file=@test_image.png"
-# → {
-#     "predicted_class": "Ankle boot",
-#     "predicted_index": 9,
-#     "probabilities": {
-#       "T-shirt/top": 0.0012,
-#       "Trouser": 0.0008,
-#       ...
-#       "Ankle boot": 0.9783
-#     }
-#   }
-```
-
-### `POST /predict-batch`
-
-Upload multiple images in one request for batch inference.
-
-```bash
-curl -X POST http://localhost:8000/predict-batch \
-  -F "files=@img1.png" \
-  -F "files=@img2.png"
-# → {"predictions": [{"filename":"img1.png","predicted_class":"Coat","predicted_index":4}, ...]}
-```
-
-## Interactive API Docs
-
-Once the server is running, open the auto-generated Swagger UI:
-
-👉 **http://localhost:8000/docs**
-
-You can upload models and test predictions directly from the browser.
-
-## Local Development (without Docker)
-
-```bash
-# Create conda environment
-conda env create -f environment.yml
-conda activate pytorch
-
-# Start the server
-uvicorn server:app --host 0.0.0.0 --port 8000 --reload
-```
-
-Or with pip:
-
-```bash
-pip install fastapi uvicorn[standard] python-multipart pillow torch torchvision
-uvicorn server:app --host 0.0.0.0 --port 8000 --reload
+curl -X POST http://localhost:8000/predict-json \
+  -H "Content-Type: application/json" \
+  -d '{"images": [[784 values], [784 values]]}'
+# → {"predictions":[{"index":0,"predicted_class":"Coat","predicted_index":4}, ...]}
 ```
 
 ## Saving Your Trained Model
 
-After training your CNN model (e.g. in `cnn.py`), export it so the server can load it:
+训练完 CNN 模型后，保存 state_dict，服务器启动时自动加载：
 
 ```python
 import torch
@@ -125,8 +64,6 @@ model = CNN()
 # ... train your model ...
 torch.save(model.state_dict(), "cnn_model.pt")
 ```
-
-Then upload `cnn_model.pt` to the server via `POST /upload-model`.
 
 ## Model Architecture
 
