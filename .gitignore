@@ -1,0 +1,116 @@
+# ===========================
+# Python
+# ===========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg-info/
+.eggs/
+*.manifest
+*.spec
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+.venv-*/
+
+# pip
+pip-log.txt
+pip-delete-this-directory.txt
+*.whl
+
+# Poetry / PDM / uv
+poetry.lock
+pdm.lock
+uv.lock
+
+# Unit test / coverage
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+.ruff_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+
+# ===========================
+# IDE / Editor
+# ===========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ===========================
+# Jupyter Notebook
+# ===========================
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ===========================
+# Docker
+# ===========================
+docker-compose.override.yml
+
+# ===========================
+# PyTorch / Machine Learning
+# ===========================
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.engine
+*.trt
+*.plan
+checkpoints/
+saved_models/
+
+# TensorBoard
+runs/
+logs/
+tf_logs/
+
+# Weights & Biases
+wandb/
+
+# MLflow
+mlruns/
+
+# Datasets (large files, uncomment if needed)
+# data/
+# datasets/
+# raw/
+
+# ===========================
+# Environment & Secrets
+# ===========================
+.env
+.env.local
+.env.*.local
+*.env
+!example.env
+
+# ===========================
+# OS
+# ===========================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+
+
+data/
