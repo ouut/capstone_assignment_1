@@ -29,9 +29,11 @@ class DNN(nn.Module):
         return self.layers(x)
 
 # ---- Count parameters ----
+from cnn import CNN
+
 dnn_model = DNN().to(device)
 dnn_params = sum(p.numel() for p in dnn_model.parameters())
-cnn_params = sum(p.numel() for p in CNN().parameters())
+cnn_params = sum(p.numel() for p in CNN().to(device).parameters())
 
 print(f"DNN parameters: {dnn_params:,}")
 print(f"CNN parameters: {cnn_params:,}")

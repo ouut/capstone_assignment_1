@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Data (training data, not needed for inference)
+data/
+
+# Generated images
+*.png
+
+# Docs
+*.md
+
+# Claude
+.claude/
+
+# Git
+.git/
+.gitignore

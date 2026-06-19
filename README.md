@@ -23,7 +23,7 @@ The server is now live at **http://localhost:8000**.
 If you already have a trained model, mount it and set `MODEL_PATH`:
 
 ```bash
-docker run -p 8000:8000 -v $(pwd)/models:/models -e MODEL_PATH=/models/cnn_model.pt fashion-cnn-server
+docker run -p 8000:8000 -v $(pwd)/models:/app/models:ro -e MODEL_PATH=/app/models/best_model.pt fashion-cnn-server
 ```
 
 ## API Endpoints
@@ -99,7 +99,7 @@ You can upload models and test predictions directly from the browser.
 
 ```bash
 # Create conda environment
-conda env create -f enviroment.yml
+conda env create -f environment.yml
 conda activate pytorch
 
 # Start the server
@@ -115,13 +115,13 @@ uvicorn server:app --host 0.0.0.0 --port 8000 --reload
 
 ## Saving Your Trained Model
 
-After training your CNN model (e.g. in `CNN.py`), export it so the server can load it:
+After training your CNN model (e.g. in `cnn.py`), export it so the server can load it:
 
 ```python
 import torch
-from CNN import YourCNN  # or define FashionCNN matching server.py
+from cnn import CNN
 
-model = FashionCNN(num_classes=10)
+model = CNN()
 # ... train your model ...
 torch.save(model.state_dict(), "cnn_model.pt")
 ```
@@ -130,20 +130,22 @@ Then upload `cnn_model.pt` to the server via `POST /upload-model`.
 
 ## Model Architecture
 
-The server expects a CNN with this architecture (defined in `server.py`):
+The server expects a CNN with this architecture (defined in `cnn.py`):
 
 | Layer       | Details                          |
 |-------------|----------------------------------|
-| Conv2d      | 1 → 32, kernel=3, padding=1      |
-| BatchNorm2d | 32                               |
+| Conv2d      | 1 → 6, kernel=5                  |
+| ReLU        |                                  |
 | MaxPool2d   | 2×2                              |
-| Conv2d      | 32 → 64, kernel=3, padding=1     |
-| BatchNorm2d | 64                               |
+| Conv2d      | 6 → 16, kernel=5                 |
+| ReLU        |                                  |
 | MaxPool2d   | 2×2                              |
-| Dropout     | 0.25                             |
-| Linear      | 64×7×7 → 128                     |
-| Dropout     | 0.25                             |
-| Linear      | 128 → 10                         |
+| Flatten     | 16×4×4 = 256                     |
+| Linear      | 256 → 120                        |
+| ReLU        |                                  |
+| Linear      | 120 → 84                         |
+| ReLU        |                                  |
+| Linear      | 84 → 10                          |
 
 Input: `(1, 28, 28)` grayscale image. Output: 10 class logits.
 
@@ -153,7 +155,8 @@ Input: `(1, 28, 28)` grayscale image. Output: 10 class logits.
 |--------------------|----------------------------------------------|
 | `server.py`        | FastAPI server (single-file application)     |
 | `Dockerfile`       | Docker container definition                  |
-| `enviroment.yml`   | Conda environment specification              |
+| `environment.yml`  | Conda environment specification              |
 | `data_loader.py`   | FashionMNIST data loading & augmentation     |
-| `CNN.py`           | CNN model training script (to be completed)  |
-| `DNN.py`           | DNN model training script (to be completed)  |
+| `cnn.py`           | CNN model class and training script          |
+| `dnn.py`           | DNN model class and training script          |
+| `report.ipynb`     | Full training, evaluation, and Docker test   |

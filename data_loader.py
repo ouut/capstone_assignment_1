@@ -51,3 +51,6 @@ def get_test_data_loaders(batch_size=64):
 
 def get_data_classes():
     return train_image_data.classes
+
+def get_device():
+    return torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else 'cpu'
