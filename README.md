@@ -5,14 +5,13 @@ FastAPI server for FashionMNIST image classification with PyTorch CNN. Accepts J
 ## Quick Start
 
 ```bash
-# Install dependencies
-pip install fastapi uvicorn[standard] pillow torch torchvision numpy
+# Create conda environment
+conda env create -f environment.yml
+conda activate pytorch
 
-# Start the server
-uvicorn server:app --host 0.0.0.0 --port 8000
+# Open the report notebook and run cells step by step
+jupyter notebook report.ipynb
 ```
-
-The server is live at **http://localhost:8000**。打开 **http://localhost:8000/docs** 查看 Swagger UI。
 
 ## API Endpoints
 
@@ -32,9 +31,9 @@ curl http://localhost:8000/classes
 
 ### `POST /predict-json`
 
-传入 JSON 像素数据，支持单张和批量预测。
+Send JSON pixel data for single or batch prediction.
 
-**单张预测** — 传入 784 个像素值（28x28 拉平）或 28x28 二维数组：
+**Single prediction** — flat 784 array (28x28) or 2D 28x28 array:
 
 ```bash
 curl -X POST http://localhost:8000/predict-json \
@@ -43,7 +42,7 @@ curl -X POST http://localhost:8000/predict-json \
 # → {"predicted_class":"Ankle boot","predicted_index":9,"probabilities":{...}}
 ```
 
-**批量预测** — 传入多个图像：
+**Batch prediction** — multiple images:
 
 ```bash
 curl -X POST http://localhost:8000/predict-json \
@@ -54,7 +53,7 @@ curl -X POST http://localhost:8000/predict-json \
 
 ## Saving Your Trained Model
 
-训练完 CNN 模型后，保存 state_dict，服务器启动时自动加载：
+After training, save the state_dict so the server can load it:
 
 ```python
 import torch
@@ -96,4 +95,4 @@ Input: `(1, 28, 28)` grayscale image. Output: 10 class logits.
 | `data_loader.py`   | FashionMNIST data loading & augmentation     |
 | `cnn.py`           | CNN model class and training script          |
 | `dnn.py`           | DNN model class and training script          |
-| `report.ipynb`     | Full training, evaluation, and Docker test   |
+| `report.ipynb`     | Training, evaluation, and server test        |
